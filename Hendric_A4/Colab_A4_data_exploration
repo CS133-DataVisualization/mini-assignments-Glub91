@@ -1,0 +1,58 @@
+## Explorating the Tree of Life
+
+<table><tr><td>
+<img src="https://i.guim.co.uk/img/static/sys-images/Guardian/Pix/pictures/2008/04/17/DarwinSketch.article.jpg?width=445&quality=85&auto=format&fit=max&s=c7f89552d12b8495b2b4eb4d7a5bc391" width=200><a href="https://i.guim.co.uk/img/static/sys-images/Guardian/Pix/pictures/2008/04/17/DarwinSketch.article.jpg?width=445&quality=85&auto=format&fit=max&s=c7f89552d12b8495b2b4eb4d7a5bc391">source</a></td><td><img src="http://www.greennature.ca/greennature/taxonomy/tree_of_life.png" width=300><a href="http://www.greennature.ca/greennature/taxonomy/tree_of_life.png">source</a></td></tr></table>
+In this hands-on exercise, you answer the following questions by using pandas data structures and methods to analyze the eukaryote genome data store in the following tab-delimited file. https://raw.githubusercontent.com/csbfx/advpy122-data/master/euk.tsv
+import pandas as pd
+%matplotlib inline
+
+# this input file is tab-delimited instead of comma-delimited
+tsvFile = "https://raw.githubusercontent.com/csbfx/advpy122-data/master/euk.tsv"
+# Load the csv file into a dataframe
+euk = pd.read_csv(tsvFile, sep="\t")
+euk
+## Q1. How many Mammals have at least 20,000 genes? What are their scientific names?
+*Note:*
+- *Mammals are under Class*
+- *Scientific names are under Species*
+
+# Your code here . . .
+mammals = euk[euk.Class == 'Mammals']
+mammals['Number of genes'] = pd.to_numeric(mammals['Number of genes'], errors='coerce')
+mammals_above_20k = mammals[mammals['Number of genes'] >= 20000]
+mammals_above_20k['Species'].count()
+mammals_above_20k['Species']
+### Q2. Animals are a part of Kingdom. How many records are there for each Class of Animals?
+# Your code here . . .
+euk.Class.value_counts()
+### Q3. Animals are a part of Kingdom. How many unique Species are there for each Class of Animals?
+# Your code here . . .
+euk.groupby('Class')['Species'].nunique()
+### Q4. What are the unique scientific names of Mammals with the genus name Macaca?
+*Recall: the scientific name starts with genus followed by a space and then the species name. Example: Homo sapiens, where Homo is the genus name and sapiens is the species name.*
+# Your code here . . .
+macaca_mammals = mammals[mammals.Species.str.startswith('Macaca')]
+macaca_mammals.Species.unique()
+### Q5. Modify the Species names to only contain the scientific names  and create a new dataframe.
+
+Some of the names in the Species column have more than two parts, such as `Emiliania huxleyi CCMP1516`. Create a new column `Species` that contains only the first two parts of name, such as `Emiliania huxleyi`. Combine this new Species column with `Kingdom`, `Class`, `Size (Mb)`, `Number of genes`, and `Number of proteins` and store this new dataframe as `df_species`.
+
+Hint: Follow Q3 in Lecture 4 with a little twist. Instead of just getting the first element from the split results, you will get the first two elements using `.str[0:2]` which will give you a list. You can then use `.str.join(" ")` to change it back to a string.
+# Your code here . . .
+euk['Species'] = euk.Species.str.split(' ').str[0:2]
+euk['Species'] = euk['Species'].str.join(" ")
+df_species = euk
+euk
+### Q6. Create a pie plot using pandas to show the number of unique Species in each Class of Animals using the new dataframe you created in Q5
+Hint: First, create a new dataframe that contains the number of unique Species and the index is the corresponding Animals Class. Then, use that dataframe to plot the pie plot.
+[Check out this documentation](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.plot.pie.html)
+# Create a new dataframe that contains the number of unique Species and
+# the index is the corresponding Animals Class.
+
+# Your code here . . .
+df_species = euk.groupby('Class')['Species'].nunique()
+df_species
+# Create a panda pie plot using the dataframe above
+
+# Your code here . . .
+df_species.plot.pie()
